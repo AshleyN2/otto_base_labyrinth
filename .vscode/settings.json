@@ -1,0 +1,5 @@
+{
+    "idf.currentSetup": "/Users/ash/.espressif/v6.0/esp-idf",
+    "idf.port": "/dev/tty.usbserial-10",
+    "idf.flashType": "UART"
+}
