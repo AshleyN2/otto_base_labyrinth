@@ -43,7 +43,20 @@ void app_main(void) {
     } else if (distance_cm > 5.0f) { // Object approaching: Reduce speed to 25%
       otto_forward(0.25f);  // slow down when close
     } else {
+      // Object very close: Manuever 
+      otto_stop(); // Stop the robot
+      vTaskDelay(pdMS_TO_TICKS(200)); // Short delay to ensure the robot has stopped
+
+      otto_reverse(0.5f); // Move backward at 50% speed
+      vTaskDelay(pdMS_TO_TICKS(500)); // Move backward for 500ms
+
+      otto_turn_right(speed); // Turn right 
+      vTaskDelay(pdMS_TO_TICKS(300)); // Turn for 300ms
+
       otto_stop(); // Object too close: Safety stop
+
+      //Clear out the distance queue to avoid reacting to stale measurements after maneuvering
+      xQueueReset(distance_queue); 
     }
   }
   vTaskDelay(pdMS_TO_TICKS(US_TIMEOUT_MS));  // delay before next check
