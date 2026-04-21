@@ -54,7 +54,7 @@ void app_main(void) {
       vTaskDelay(pdMS_TO_TICKS(950)); // Turn for 950ms which is an almost perfect 90° angle for wonky the otto (adjust as needed for a 90 degree turn)
 
       otto_forward(0.25f); // Move forward at 25% speed to try to navigate around the obstacle
-      vTaskDelay(pdMS_TO_TICKS(500)); // Move forward for 500ms
+      vTaskDelay(pdMS_TO_TICKS(200)); // Move forward for 200ms
 
       otto_stop(); // Object too close: Safety stop
 
