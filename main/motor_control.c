@@ -6,8 +6,8 @@
 
 #define TAG "otto_wheels"
 // calibration values for the motors
-#define CALI_LEFT 1.03f
-#define CALI_RIGHT 0.98f
+#define CALI_LEFT 1.01f
+#define CALI_RIGHT 0.99f
 // Toogled OTTO's wonky wheels to make them more balanced. Adjust as needed for your specific hardware setup.
 
 /* ********** */
