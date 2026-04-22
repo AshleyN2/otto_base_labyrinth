@@ -45,38 +45,49 @@ void app_main(void) {
           }
           else {
             // Object very close: Manuever 
-            // //otto_stop(); // Stop the robot
-            vTaskDelay(pdMS_TO_TICKS(200)); // Short delay to ensure the robot has stopped before executing the maneuver
+            otto_stop(); // Stop the robot
             otto_reverse(0.5f); // Move backward at 50% speed to create some distance from the obstacle
-            vTaskDelay(pdMS_TO_TICKS(500)); // Move backward for 500ms to ensure enough distance is created for the turn
-            // otto_stop(); // Stop before turning to ensure a more accurate turn
+            vTaskDelay(pdMS_TO_TICKS(200)); // Short delay to ensure the robot has stopped before executing the maneuver
+            otto_stop(); // Stop before turning to ensure a more accurate turn
 
             otto_turn_left(speed); // Turn left at the defined speed to try to navigate around the obstacle
             vTaskDelay(pdMS_TO_TICKS(950)); // Turn for 950ms which is an almost perfect 90° angle for wonky the otto (adjust as needed for a 90 degree turn)
-            otto_forward(speed); // Move forward at the defined speed after the turn to try to navigate around the obstacle
-            vTaskDelay(pdMS_TO_TICKS(500)); // Move forward for 500ms to clear the obstacle after the turn
+            otto_stop(); // Stop after turning to ensure a more accurate forward movement
+            float left_distance; // Variable to store distance measurement after the turn
+            if (xQueueReceive(distance_queue, &left_distance, pdMS_TO_TICKS(400))) {
+              if (distance_cm > 10.0f) 
+              { // Clear path after turn: Move forward at the defined speed
+                otto_forward(speed); // Move forward at the defined speed
+                return; // Exit the loop to continue normal operation
+              } // If the path is still blocked after the turn, try turning right instead
+            } 
+            otto_turn_right(speed); // Turn right at the defined speed to try to navigate around the obstacle
+            vTaskDelay(pdMS_TO_TICKS(1900)); // Turn for 1900ms which is an almost perfect 180° angle for wonky the otto (adjust as needed for a 180 degree turn)
+            otto_stop(); // Stop after turning to ensure a more accurate forward movement
+            float right_distance; // Variable to store distance measurement after the turn
+            if (xQueueReceive(distance_queue, &right_distance, pdMS_TO_TICKS(400))) {
+              if (distance_cm > 10.0f)              
+              { // Clear path after turn: Move forward at the defined speed
+                otto_forward(speed); // Move forward at the defined speed
+                return; // Exit the loop to continue normal operation
+              } // If the path is still blocked after the turn, try turning left again to attempt to navigate around the obstacle 
+            }
+            
+            otto_turn_right(speed); // Turn right at the defined speed to try to navigate around the obstacle
+            vTaskDelay(pdMS_TO_TICKS(900));  // Turn to face the original direction (adjust as needed for a 90 degree turn)
             otto_stop(); // Stop after turning to ensure a more accurate forward movement
 
-            xQueueReceive(distance_queue, &distance_cm, pdMS_TO_TICKS(400)); // Check distance again after the turn to decide whether to move forward or try another turn
-            if (distance_cm > 10.0f) {
-              otto_forward(speed); // Clear path after turn: Move forward at the defined speed
-            } else {
-              otto_turn_right(speed); // Turn right 
-              vTaskDelay(pdMS_TO_TICKS(1900)); // Turn for 950ms which is an almost perfect 90° angle for wonky the otto (adjust as needed for a 90 degree turn)
-
-              otto_forward(0.25f); // Move forward at 25% speed to try to navigate around the obstacle
-              vTaskDelay(pdMS_TO_TICKS(200)); // Move forward for 200ms
-
-              otto_stop(); // Object too close: Safety stop
-
-              //Clear out the distance queue to avoid reacting to stale measurements after maneuvering
-              xQueueReset(distance_queue); 
+            otto_reverse(0.5f); // Move backward at 50% speed to create some distance from the obstacle
+            vTaskDelay(pdMS_TO_TICKS(200)); // Short delay to ensure the robot
+            otto_stop(); // Stop before turning to ensure a more accurate turn
+            xQueueReset(distance_queue); // Clear the distance queue to avoid processing stale measurements after the maneuver
             }
           }
         } 
         vTaskDelay(pdMS_TO_TICKS(US_TIMEOUT_MS));  // delay before next check
-  }
-}
+    }
+
+
 
 
     
